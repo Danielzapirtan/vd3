@@ -3,4 +3,3 @@ pytube
 yt-dlp
 browser-cookie3
 requests
-whispermlx
