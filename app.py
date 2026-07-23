@@ -37,8 +37,8 @@ def is_valid_url(url):
     """Basic URL validation"""
     youtube_regex = (
         r'(https?://)?(www\.)?'
-        '(youtube|youtu|youtube-nocookie)\.(com|be)/'
-        '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
+        '(youtube|youtu|youtube-nocookie)\\.(com|be)/'
+        '(watch\\?v=|embed/|v/|.+\\?v=)?([^&=%\\?]{11})')
     
     generic_url_regex = (
         r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|'
