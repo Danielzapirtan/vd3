@@ -3,192 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Transcription Tool</title>
+    <title>YouTube Video Downloader</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
+        
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
         }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .url-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
+        
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 600;
+            color: #444;
         }
+        
         input[type="text"], select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
         }
+        
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
         .checkbox-group {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin: 15px 0;
         }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
         button {
-            background-color: #4CAF50;
-            color: white;
+            flex: 1;
             padding: 12px 20px;
             border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .video-preview {
+            display: none;
+            margin-top: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .video-preview.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .video-info {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .video-details h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .video-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #666;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .formats-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .formats-section h4 {
+            margin-bottom: 10px;
+            color: #444;
+        }
+        
+        .format-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .format-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 5px;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
+            transition: all 0.2s;
         }
-        button:hover {
-            background-color: #45a049;
+        
+        .format-item:hover {
+            background: #f0f0ff;
+            border-color: #667eea;
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        
+        .format-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
         }
-        #result {
-            margin-top: 20px;
-            display: none;
+        
+        .format-item input[type="radio"] {
+            margin-right: 10px;
         }
-        #transcription {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        
+        .format-details {
+            flex: 1;
         }
-        .error {
-            color: red;
-            margin-top: 10px;
+        
+        .format-size {
+            color: #999;
+            font-size: 13px;
         }
-        .success {
-            color: green;
-            margin-top: 10px;
-        }
+        
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            padding: 30px;
         }
+        
+        .loading.active {
+            display: block;
+        }
+        
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 15px;
         }
+        
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-message.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        .success-message {
+            background: #e6ffe6;
+            color: #00b894;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .success-message.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .save-button {
-            background-color: #007bff;
-            margin-top: 10px;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .save-button:hover {
-            background-color: #0056b3;
+        
+        .format-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-video {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .badge-audio {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .badge-both {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎥 Video Transcription Tool</h1>
+        <h1>📥 YouTube Video Downloader</h1>
+        <p class="subtitle">Download videos in any quality with Chrome cookie support</p>
         
-        <div class="form-group">
-            <label for="url">Video URL:</label>
-            <input type="text" id="url" placeholder="Enter video URL...">
+        <div class="url-section">
+            <div class="form-group">
+                <label for="url">Video URL:</label>
+                <input type="text" id="url" placeholder="Paste YouTube or other video URL here...">
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="use_cookies">
+                <label for="use_cookies">Use Chrome cookies (for age-restricted/private videos)</label>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-info" onclick="getVideoInfo()">🔍 Get Video Info</button>
+                <button class="btn-download" id="downloadBtn" onclick="downloadVideo()" disabled>⬇️ Download</button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="language">Language:</label>
-            <select id="language">
-                <option value="auto">Auto-detect</option>
-                <option value="ro">Romanian</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="model_size">Model Size:</label>
-            <select id="model_size">
-                <option value="tiny">Tiny - Fastest, least accurate</option>
-                <option value="base" selected>Base - Good balance (recommended)</option>
-                <option value="small">Small - Better accuracy</option>
-                <option value="medium">Medium - High accuracy</option>
-                <option value="large">Large - Highest accuracy, slowest</option>
-            </select>
-        </div>
-        
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="use_cookies">
-            <label for="use_cookies">Use Chrome cookies for authentication</label>
-        </div>
-        
-        <button id="transcribeBtn" onclick="transcribe()">Transcribe Video</button>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Processing... This may take a few minutes.</p>
+            <p id="loadingText">Loading...</p>
         </div>
         
-        <div id="result">
-            <h3>Transcription:</h3>
-            <div id="transcription"></div>
-            <button class="save-button" onclick="saveTranscription()">Save to File</button>
-        </div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
         
-        <div id="error" class="error"></div>
+        <div class="video-preview" id="videoPreview">
+            <div class="video-info">
+                <img class="video-thumbnail" id="thumbnail" src="" alt="Video thumbnail">
+                <div class="video-details">
+                    <h3 id="videoTitle"></h3>
+                    <div class="video-meta">
+                        <span class="meta-item" id="duration"></span>
+                        <span class="meta-item" id="views"></span>
+                        <span class="meta-item" id="uploader"></span>
+                    </div>
+                    <p id="description" style="color: #666; font-size: 14px; margin-top: 10px;"></p>
+                </div>
+            </div>
+            
+            <div class="formats-section">
+                <h4>Available Formats (click to select):</h4>
+                <div class="format-list" id="formatList"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let currentTranscription = '';
+        let selectedFormat = 'best';
+        let currentVideoInfo = null;
         
-        async function transcribe() {
+        function showLoading(text = 'Loading...') {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('loadingText').textContent = text;
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('active');
+            setTimeout(() => errorDiv.classList.remove('active'), 5000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.add('active');
+            setTimeout(() => successDiv.classList.remove('active'), 5000);
+        }
+        
+        function formatDuration(seconds) {
+            if (!seconds) return 'Unknown';
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hrs > 0) {
+                return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === 0) return 'Unknown size';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+        }
+        
+        function getFormatType(format) {
+            const hasVideo = format.vcodec !== 'none';
+            const hasAudio = format.acodec !== 'none';
+            
+            if (hasVideo && hasAudio) return 'both';
+            if (hasVideo) return 'video';
+            return 'audio';
+        }
+        
+        function getFormatBadge(format) {
+            const type = getFormatType(format);
+            const labels = {
+                'both': '<span class="format-badge badge-both">Video+Audio</span>',
+                'video': '<span class="format-badge badge-video">Video Only</span>',
+                'audio': '<span class="format-badge badge-audio">Audio Only</span>'
+            };
+            return labels[type] || '';
+        }
+        
+        async function getVideoInfo() {
             const url = document.getElementById('url').value.trim();
-            const language = document.getElementById('language').value;
-            const modelSize = document.getElementById('model_size').value;
             const useCookies = document.getElementById('use_cookies').checked;
             
             // Reset UI
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
+            document.getElementById('videoPreview').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('downloadBtn').disabled = true;
+            selectedFormat = 'best';
             
             if (!url) {
                 showError('Please enter a video URL');
                 return;
             }
             
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('transcribeBtn').disabled = true;
+            showLoading('Fetching video information...');
             
             try {
-                const response = await fetch('/transcribe', {
+                const response = await fetch('/video_info', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         url: url,
-                        language: language,
-                        model_size: modelSize,
                         use_cookies: useCookies
                     })
                 });
@@ -196,49 +455,153 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentTranscription = data.transcription;
-                    document.getElementById('transcription').textContent = data.transcription;
-                    document.getElementById('result').style.display = 'block';
+                    currentVideoInfo = data.video_info;
+                    displayVideoInfo(data.video_info);
+                    document.getElementById('downloadBtn').disabled = false;
+                    showSuccess('Video information loaded successfully! Select a format and click Download.');
                 } else {
-                    showError(data.error || 'An error occurred');
+                    showError(data.error || 'Failed to get video information');
                 }
             } catch (error) {
                 showError('Network error: ' + error.message);
             } finally {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('transcribeBtn').disabled = false;
+                hideLoading();
             }
         }
         
-        async function saveTranscription() {
-            if (!currentTranscription) return;
+        function displayVideoInfo(info) {
+            // Display video details
+            document.getElementById('videoTitle').textContent = info.title;
+            document.getElementById('duration').textContent = '⏱️ ' + formatDuration(info.duration);
+            document.getElementById('views').textContent = '👁️ ' + info.views.toLocaleString() + ' views';
+            document.getElementById('uploader').textContent = '👤 ' + info.uploader;
+            document.getElementById('description').textContent = info.description;
             
-            const url = document.getElementById('url').value;
-            let filename = 'transcription.txt';
-            
-            // Try to extract video ID for filename
-            try {
-                const urlObj = new URL(url);
-                const videoId = urlObj.searchParams.get('v') || url.split('/').pop();
-                filename = `transcript_${videoId}.txt`;
-            } catch (e) {
-                // Use default filename
+            // Set thumbnail
+            if (info.thumbnail) {
+                document.getElementById('thumbnail').src = info.thumbnail;
             }
             
+            // Display formats
+            const formatList = document.getElementById('formatList');
+            formatList.innerHTML = '';
+            
+            if (info.formats && info.formats.length > 0) {
+                // Group formats by type
+                const groupedFormats = {
+                    'best': [],
+                    'video': [],
+                    'audio': []
+                };
+                
+                // Add best quality option
+                const bestOption = document.createElement('div');
+                bestOption.className = 'format-item selected';
+                bestOption.innerHTML = `
+                    <input type="radio" name="format" value="best" checked>
+                    <div class="format-details">
+                        <strong>📺 Best Quality</strong> ${getFormatBadge({vcodec: 'h264', acodec: 'aac'})}
+                        <br><small>Automatically selects the best available quality (up to 1080p)</small>
+                    </div>
+                `;
+                bestOption.onclick = () => selectFormat('best', bestOption);
+                formatList.appendChild(bestOption);
+                
+                // Add audio only option
+                const audioOption = document.createElement('div');
+                audioOption.className = 'format-item';
+                audioOption.innerHTML = `
+                    <input type="radio" name="format" value="audio">
+                    <div class="format-details">
+                        <strong>🎵 Audio Only (MP3)</strong> ${getFormatBadge({vcodec: 'none', acodec: 'aac'})}
+                        <br><small>Extract audio as MP3</small>
+                    </div>
+                `;
+                audioOption.onclick = () => selectFormat('audio', audioOption);
+                formatList.appendChild(audioOption);
+                
+                // Add individual formats
+                info.formats.forEach(format => {
+                    const formatItem = document.createElement('div');
+                    formatItem.className = 'format-item';
+                    
+                    let formatLabel = '';
+                    if (format.resolution && format.resolution !== 'audio only') {
+                        formatLabel = `📹 ${format.resolution}`;
+                    } else {
+                        formatLabel = '🎵 Audio';
+                    }
+                    
+                    if (format.format_note) {
+                        formatLabel += ` (${format.format_note})`;
+                    }
+                    
+                    formatItem.innerHTML = `
+                        <input type="radio" name="format" value="${format.format_id}">
+                        <div class="format-details">
+                            <strong>${formatLabel}</strong> ${getFormatBadge(format)}
+                            <span class="format-size">${formatFileSize(format.filesize)}</span>
+                            <br><small>Format: ${format.ext} | ${format.resolution} | Bitrate: ${format.tbr || 'N/A'}kbps</small>
+                        </div>
+                    `;
+                    
+                    formatItem.onclick = () => selectFormat(format.format_id, formatItem);
+                    formatList.appendChild(formatItem);
+                });
+            } else {
+                formatList.innerHTML = '<p>No format information available</p>';
+            }
+            
+            // Show preview
+            document.getElementById('videoPreview').classList.add('active');
+        }
+        
+        function selectFormat(formatId, element) {
+            selectedFormat = formatId;
+            
+            // Update visual selection
+            document.querySelectorAll('.format-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+        
+        async function downloadVideo() {
+            const url = document.getElementById('url').value.trim();
+            const useCookies = document.getElementById('use_cookies').checked;
+            
+            if (!url) {
+                showError('Please enter a video URL');
+                return;
+            }
+            
+            showLoading('Downloading video... This may take a few moments.');
+            document.getElementById('downloadBtn').disabled = true;
+            
             try {
-                const response = await fetch('/save_transcription', {
+                const response = await fetch('/download', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        text: currentTranscription,
-                        filename: filename
+                        url: url,
+                        format_id: selectedFormat,
+                        use_cookies: useCookies
                     })
                 });
                 
                 if (response.ok) {
                     const blob = await response.blob();
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'downloaded_video.mp4';
+                    
+                    if (contentDisposition) {
+                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                        if (matches && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '');
+                        }
+                    }
+                    
+                    // Trigger download
                     const downloadUrl = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = downloadUrl;
@@ -247,19 +610,35 @@
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(downloadUrl);
+                    
+                    showSuccess('Download started successfully!');
                 } else {
-                    showError('Failed to save file');
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Download failed');
                 }
             } catch (error) {
-                showError('Error saving file: ' + error.message);
+                showError('Network error: ' + error.message);
+            } finally {
+                hideLoading();
+                document.getElementById('downloadBtn').disabled = false;
             }
         }
         
-        function showError(message) {
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = '❌ ' + message;
-            errorDiv.style.display = 'block';
+        // Check dependencies on load
+        async function checkDeps() {
+            try {
+                const response = await fetch('/check_dependencies');
+                const data = await response.json();
+                if (!data.success) {
+                    showError('Warning: Some dependencies may be missing. Check server console for details.');
+                }
+            } catch (error) {
+                console.log('Dependency check failed:', error);
+            }
         }
+        
+        // Initialize
+        checkDeps();
     </script>
 </body>
 </html>
