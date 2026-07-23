@@ -385,6 +385,7 @@ def download():
         print(f"Sending file: {filename} ({mimetype})")
         
         # Schedule cleanup after send
+        '''
         @app.after_request
         def cleanup(response):
             try:
@@ -396,7 +397,7 @@ def download():
             except Exception as e:
                 print(f"Cleanup error: {e}")
             return response
-        
+        '''
         return send_file(
             video_file,
             as_attachment=True,
